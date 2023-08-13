@@ -1,0 +1,96 @@
+import requests
+from bs4 import BeautifulSoup
+
+# a function that takes a URL and returns the PDFs
+def get_pdf_urls(url):
+    # Fetch the HTML content
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    # Find the table (you might need to adjust this based on the table's HTML structure)
+    table = soup.find('table')
+
+    # Extract URLs from the table (adjust based on the table's structure)
+    pdf_urls = [a['href'] for a in table.find_all('a') if 'pdf' in a['href']]
+    return pdf_urls
+
+
+# function for reading the PDFs
+import PyPDF2
+from io import BytesIO
+
+def read_pdf(pdf_url):
+    response = requests.get(pdf_url)
+    pdf_reader = PyPDF2.PdfReader(BytesIO(response.content))
+    # Read PDF from URL
+    
+    # Extract text
+    text = ""
+    for page_num in range(len(pdf_reader.pages)):
+        text += pdf_reader.pages[page_num].extract_text()
+
+    return text
+
+# Gather based on URL
+url = 'https://github.com/epowell101/graph-fraud-detection-papers'
+pdf_urls = get_pdf_urls(url)
+
+# Print the first 5 URLs 
+print(pdf_urls[:5])
+
+# Summarization using BART not Bert
+import torch
+from transformers import BartForConditionalGeneration, BartTokenizer
+tokenizer = BartTokenizer.from_pretrained('facebook/bart-large-cnn')
+model = BartForConditionalGeneration.from_pretrained('facebook/bart-large-cnn')
+
+def summarize_and_extract_embeddings(text):
+    # Tokenize and summarize
+    inputs = tokenizer([text], max_length=1024, return_tensors='pt', truncation=True)
+    summary_ids = model.generate(inputs['input_ids'], num_beams=4, min_length=30, max_length=150, early_stopping=True)
+    summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+
+    # Extract embeddings from encoder
+    with torch.no_grad():
+        encoder_outputs = model.get_encoder()(inputs['input_ids'])
+        embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
+
+    return summary, embeddings
+
+
+
+# process embeddings - may want to shift to max pool and also elsewhere will want to look at keywords
+def process_embeddings(embeddings):
+    # Average across the token dimension to get a single vector for the entire text
+    return embeddings.mean(dim=0)
+
+# use FAISS as a vector DB and add embeddings to the model
+import faiss
+d = 1024 # This is the dimension for BARTforConditionalGeneration embeddings
+
+# Create an index
+index = faiss.IndexFlatL2(d)
+recent_summaries = []
+
+
+for pdf_url in pdf_urls[-5:]: # Limiting to last 5 for printing recent summaries
+    # Read the PDF
+    pdf_text = read_pdf(pdf_url)
+    
+    # Summarize and extract embeddings
+    summary, embeddings = summarize_and_extract_embeddings(pdf_text)
+    
+    # Store the summary
+    recent_summaries.append((pdf_url, summary))
+    
+    # Store embeddings in FAISS (after processing them if needed)
+    processed_embeddings = process_embeddings(embeddings)
+    processed_embeddings = processed_embeddings.reshape(1, -1)
+    index.add(processed_embeddings)
+
+
+# Print recent summaries
+for url, summary in recent_summaries:
+    print(f"URL: {url}")
+    print(f"Summary: {summary}\n")
+
