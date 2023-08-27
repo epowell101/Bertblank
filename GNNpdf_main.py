@@ -78,9 +78,6 @@ def main():
         with open(embeddings_path, 'wb') as f:
             pickle.dump(final_embeddings, f)
 
-    # Analyze and visualize the embeddings
-    analyze_and_visualize(final_embeddings, search_terms, pdf_urls, bert_tokenizer, bert_model, faissindex, k)
-
     # Perform a search query
     query = "heterogeneous directed temporal"
     D, I = search_for_query(query, bert_tokenizer, bert_model, faissindex)
