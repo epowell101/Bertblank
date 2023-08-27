@@ -11,7 +11,6 @@ import time
 from bertopic import BERTopic
 from transformers import BertTokenizer, BertModel, BartTokenizer, BartForConditionalGeneration
 
-
 import numpy as np
 
 def ensure_dimension(embeddings, desired_dimension=3072):

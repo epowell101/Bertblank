@@ -10,7 +10,6 @@ import plotly.express as px
 from scraping_processing import search_for_query_embeddings, ensure_dimension
 import PyPDF2
 
-
 def extract_title_from_pdf(pdf_path):
     with open(pdf_path, 'rb') as file:
         reader = PyPDF2.PdfReader(file)
