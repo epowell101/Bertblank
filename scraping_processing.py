@@ -10,7 +10,6 @@ import logging
 import time
 from bertopic import BERTopic
 from transformers import BertTokenizer, BertModel, BartTokenizer, BartForConditionalGeneration
-
 import numpy as np
 
 def ensure_dimension(embeddings, desired_dimension=3072):
@@ -34,41 +33,12 @@ def ensure_dimension(embeddings, desired_dimension=3072):
 
     return embeddings
 
-
-
-
 # Function to summarize using BART
 def summarize(text, bart_tokenizer, bart_model):
     inputs = bart_tokenizer([text], max_length=1024, return_tensors='pt', truncation=True)
     summary_ids = bart_model.generate(inputs['input_ids'], num_beams=4, min_length=30, max_length=150, early_stopping=True)
     summary = bart_tokenizer.decode(summary_ids[0], skip_special_tokens=True)
     return summary
-
-#  def prepare_search_index(model_name='bert-base-uncased'):
-#     # Load Pre-trained BERT Model (or another model specified by model_name)
-#     bert_tokenizer = BertTokenizer.from_pretrained(model_name)
-#     bert_model = BertModel.from_pretrained(model_name)
-
-#     ## Initialize FAISS Index
-#     # dimension = bert_model.config.hidden_size  # Dimensionality of the embeddings
-#     # index = faiss.IndexFlatIP(dimension)
-
-#     return bert_tokenizer, bert_model
-
-# def create_faiss_index(document_embeddings):
-#    Normalize embeddings to enable cosine similarity with dot product
-#    document_embeddings = np.array(document_embeddings)
-#    document_embeddings = np.reshape(document_embeddings, (-1, document_embeddings.shape[-1]))
-#    faiss.normalize_L2(document_embeddings)
-#    print("Document embeddings shape:", document_embeddings.shape) # Should be (n, d), where n is the number of vectors and d is the dimensionality
-#    print("IDs shape:", np.array(range(len(document_embeddings))).shape) # Should be (n,)
-    
-    # Create index with inner product similarity
-#    faissindex = faiss.IndexFlatIP(document_embeddings.shape[1])
-#    faissindex = faiss.IndexIDMap(faissindex)
-#    faissindex.add_with_ids(document_embeddings, np.array(range(len(document_embeddings))))
-#    print(type(faissindex), "Index within Create Faiss Index")
-#    return faissindex
 
 def search_for_query_embeddings(query_embeddings, faissindex, k=5):
     # Ensure that query_embeddings is a NumPy array
@@ -84,7 +54,6 @@ def search_for_query_embeddings(query_embeddings, faissindex, k=5):
     D, I = result # Unpack the result
     return D, I
 
-
 def search_for_query(query, bert_tokenizer, bert_model, faissindex, k=10):
     logging.debug('search for query function')
     inputs = bert_tokenizer(query, return_tensors="pt", padding=True, truncation=True)
@@ -97,12 +66,6 @@ def search_for_query(query, bert_tokenizer, bert_model, faissindex, k=10):
     
     # Return distances (likelihood scores) and indices of documents
     return D, I
-
-#def interpret_results(search_terms, I, pdf_urls):
-#    for term_idx, term in enumerate(search_terms):
-#        print(f"Search term: {term}")
-#        for neighbor_idx in I[term_idx]:
-#            print(f"  - Document {neighbor_idx}: {pdf_urls[neighbor_idx]}")
 
 def get_pdf_urls(url):
     response = requests.get(url)

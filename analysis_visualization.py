@@ -34,17 +34,6 @@ def search_with_embeddings(query_embeddings, faissindex, k=5):
     D, I = faissindex.search(query_embeddings, k)
     return D, I
 
-# def interpret_results(search_terms, I, pdf_urls):
-#    for term_idx, term in enumerate(search_terms):
-#        print(f"Search term: {term}")
-#        for neighbor_idx in I[term_idx]:
-#            pdf_url = pdf_urls[neighbor_idx]
-#            title = extract_title_from_pdf(pdf_url)
-#            print(f"  - Document {neighbor_idx}: {pdf_url}")
-#            if title:
-#                print(f"    - Title: {title}")
-
-
 def embed_search_terms(search_terms, bert_tokenizer, bert_model):
     search_embeddings = []
     for term in search_terms:

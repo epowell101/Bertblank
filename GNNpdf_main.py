@@ -1,5 +1,5 @@
-from analysis_visualization import analyze_and_visualize, display_results
-from scraping_processing import get_pdf_urls, process_pdfs, add_to_faiss_index, search_for_query
+from analysis_visualization import display_results
+from scraping_processing import get_pdf_urls, process_pdfs, search_for_query
 import os
 import logging
 import faiss
@@ -8,7 +8,6 @@ import time
 import pickle
 from transformers import BartTokenizer, BartForConditionalGeneration
 from transformers import BertTokenizer, BertModel
-
 
 def check_for_existing_embeddings(path):
     if os.path.exists(path):
