@@ -88,5 +88,3 @@ def display_results(D, I, pdf_urls):
     for i, idx in enumerate(I[0]):
         likelihood_score = D[0][i]
         print(f"  - Document {idx}: {pdf_urls[idx]}, Likelihood Score: {likelihood_score}")
-
-

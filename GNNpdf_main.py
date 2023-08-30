@@ -93,5 +93,3 @@ def get_top_document(titles, summaries, search_result):
     top_title = titles[top_index]
     top_summary = summaries[top_index]
     return top_title, top_summary
-
-
