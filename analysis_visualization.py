@@ -1,3 +1,4 @@
+# mostly doing the analysis - more clean up possible
 import numpy as np
 import faiss
 import matplotlib.pyplot as plt

@@ -128,7 +128,6 @@ def process_pdfs(pdf_urls, bart_tokenizer, bart_model, bert_tokenizer, bert_mode
         embeddings = ensure_dimension(embeddings, 3072)
         gather_embeddings.append(embeddings)
         add_to_faiss_index(faissindex, embeddings)
-
     # Using BERTopic on the documents
     # topics = use_BERTopic(documents)
     return recent_summaries, gather_embeddings
